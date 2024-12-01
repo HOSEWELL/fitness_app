@@ -5,6 +5,7 @@ import ProfilesPage from "./pages/ProfilesPage";
 import SignInPage from "./pages/SignInPage";
 import ProfileDetailsPage from "./pages/ProfileDetailsPage"; 
 import DashboardPage from "./pages/DashboardPage"; 
+import ProgressPage from "./pages/ProgressPage";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/profile-details" element={<ProfileDetailsPage />} /> 
         <Route path="/dashboard" element={<DashboardPage />} /> 
+        <Route path="progress" element={<ProgressPage />} />
       </Routes>
     </Router>
   );
