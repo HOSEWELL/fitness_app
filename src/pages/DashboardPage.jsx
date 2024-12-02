@@ -6,7 +6,7 @@ const DashboardPage = () => {
   const [quote, setQuote] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newGoal, setNewGoal] = useState({
-    goal_type: "steps",
+    goal_type: "choose goal type",
     goal_value: "",
     start_date: "",
     end_date: "",
@@ -36,6 +36,43 @@ const DashboardPage = () => {
     fetchGoals();
   }, []);
 
+  // Progress update states
+  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
+  const [activityLog, setActivityLog] = useState({
+    activity_type: "cardio",
+    duration: "",
+    calories_burned: "",
+    date: "",
+    profile: 1,
+  });
+
+  const handleActivityInputChange = (e) => {
+    const { name, value } = e.target;
+    setActivityLog((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleActivityFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://127.0.0.1:8000/api/activity-logs/", activityLog);
+      alert("Activity log updated successfully!");
+      setIsProgressModalOpen(false);
+      setActivityLog({
+        activity_type: "cardio",
+        duration: "",
+        calories_burned: "",
+        date: "",
+        profile: 1,
+      });
+    } catch (error) {
+      console.error("Error updating activity log:", error);
+      alert("Error updating activity log. Please try again.");
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewGoal((prev) => ({
@@ -52,7 +89,7 @@ const DashboardPage = () => {
       setIsModalOpen(false);
       setGoals((prevGoals) => [...prevGoals, response.data]);
       setNewGoal({
-        goal_type: "steps",
+        goal_type: "choose goal type",
         goal_value: "",
         start_date: "",
         end_date: "",
@@ -99,75 +136,100 @@ const DashboardPage = () => {
 
       <div
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-20 right-4 sm:right-8 bg-blue-500 text-white rounded-full p-3 sm:p-4 shadow-lg cursor-pointer hover:bg-green-600 transition duration-300"
+        className="fixed bottom-40 right-4 sm:right-8 bg-blue-500 text-white rounded-full p-3 sm:p-4 shadow-lg cursor-pointer hover:bg-green-600 transition duration-300"
       >
         <span className="text-base sm:text-xl font-bold">Set Goal</span>
       </div>
 
       <div
         onClick={() => navigate("/progress")}
-        className="fixed bottom-4 right-4 sm:right-8 bg-blue-500 text-white rounded-full p-3 sm:p-4 shadow-lg cursor-pointer hover:bg-green-600 transition duration-300"
+        className="fixed bottom-24 right-4 sm:right-8 bg-blue-500 text-white rounded-full p-3 sm:p-4 shadow-lg cursor-pointer hover:bg-green-600 transition duration-300"
       >
         <span className="text-base sm:text-xl font-bold">View Progress</span>
       </div>
 
-      {isModalOpen && (
+      {/* Floating Update Progress Button */}
+      <div
+        onClick={() => setIsProgressModalOpen(true)}
+        className="fixed bottom-6 right-4 sm:right-8 bg-blue-500 text-white rounded-full p-3 sm:p-4 shadow-lg cursor-pointer hover:bg-green-600 transition duration-300"
+      >
+        <span className="text-base sm:text-xl font-bold">Update Progress</span>
+      </div>
+
+      {/* Update Progress Modal */}
+      {isProgressModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-11/12 sm:w-96">
-            <h3 className="text-lg sm:text-xl font-bold mb-4">Set a New Goal</h3>
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <select
-                name="goal_type"
-                value={newGoal.goal_type}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="steps">Steps</option>
-                <option value="calories">Calories</option>
-                <option value="workout">Workout Duration</option>
-              </select>
-              <input
-                type="number"
-                name="goal_value"
-                placeholder="Goal Value"
-                value={newGoal.goal_value}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <input
-                type="date"
-                name="start_date"
-                value={newGoal.start_date}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <input
-                type="date"
-                name="end_date"
-                value={newGoal.end_date}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <div className="flex justify-between mt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-300 text-gray-700 px-3 sm:px-4 py-2 rounded"
+            <h3 className="text-lg sm:text-xl font-bold mb-4">Update Progress</h3>
+            <form onSubmit={handleActivityFormSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="activity_type" className="block text-gray-700 mb-1">Activity Type</label>
+                <select
+                  id="activity_type"
+                  name="activity_type"
+                  value={activityLog.activity_type}
+                  onChange={handleActivityInputChange}
+                  className="w-full p-2 border rounded"
+                  required
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-600"
-                >
-                  Save
-                </button>
+                  <option value="cardio">Cardio</option>
+                  <option value="strength">Strength</option>
+                  <option value="flexibility">Flexibility</option>
+                  <option value="steps">Steps</option>
+                  <option value="workout">Workout</option>
+                </select>
               </div>
+              <div>
+                <label htmlFor="duration" className="block text-gray-700 mb-1">Duration (minutes)</label>
+                <input
+                  id="duration"
+                  type="number"
+                  name="duration"
+                  placeholder="Enter duration in minutes"
+                  value={activityLog.duration}
+                  onChange={handleActivityInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="calories_burned" className="block text-gray-700 mb-1">Calories Burned</label>
+                <input
+                  id="calories_burned"
+                  type="number"
+                  name="calories_burned"
+                  placeholder="Enter calories burned"
+                  value={activityLog.calories_burned}
+                  onChange={handleActivityInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="date" className="block text-gray-700 mb-1">Date</label>
+                <input
+                  id="date"
+                  type="date"
+                  name="date"
+                  value={activityLog.date}
+                  onChange={handleActivityInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
+              >
+                Submit Progress
+              </button>
             </form>
+            <button
+              onClick={() => setIsProgressModalOpen(false)}
+              className="mt-4 text-green-500 hover:text-red-700 transition duration-300"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
