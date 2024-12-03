@@ -240,7 +240,7 @@ const Dashboard = () => {
       <input
         type="number"
         value={progressData.profile} // Profile ID is prefilled as 9
-        readOnly
+        onChange={(e) => setProgressData({ ...progressData, profile: e.target.value })}
         className="w-full mb-3 p-2 border rounded bg-gray-100"
       />
       <div className="flex justify-end gap-4">
